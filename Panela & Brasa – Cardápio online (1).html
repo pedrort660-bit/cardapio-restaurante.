@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Panela & Brasa – Cardápio online</title>
+<meta name="description" content="Cardápio online: feijoada, feijão tropeiro, grelhados na brasa, assados de panela e pratos do dia a dia.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* ===== CORES: edite aqui ===== */
+:root{
+  --bg:#F1F3EC; --surface:#FFFFFF; --ink:#1D1B18; --muted:#5C6157; --line:#CDD2C2;
+  --green:#1F3D2B; --on-green:#F1F3EC; --gold:#D99A1B; --gold-ink:#7A5200;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#131711; --surface:#1B211A; --ink:#EEF0E8; --muted:#A5AC9B; --line:#333B2F;
+  --green:#2C5A3F; --on-green:#F1F3EC; --gold:#E8B03A; --gold-ink:#E8B03A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131711; --surface:#1B211A; --ink:#EEF0E8; --muted:#A5AC9B; --line:#333B2F;
+  --green:#2C5A3F; --on-green:#F1F3EC; --gold:#E8B03A; --gold-ink:#E8B03A; color-scheme:dark}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.55 Figtree,system-ui,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+h1,h2{font-family:"Bricolage Grotesque",Georgia,sans-serif;margin:0;letter-spacing:-.02em;line-height:1.05}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+
+/* Hero */
+.hero{background:var(--green);color:var(--on-green);padding:44px 0 40px}
+.hero h1{font-size:clamp(2.6rem,11vw,4.6rem);font-weight:800;max-width:11ch}
+.hero p{max-width:34ch;margin:16px 0 0;font-size:1.1rem;opacity:.92}
+.info{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:22px;font-size:.92rem;font-weight:500}
+.info span{border-left:3px solid var(--gold);padding-left:10px}
+
+/* Navegação de categorias */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:8px;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+nav a{flex:none;padding:8px 14px;border-radius:99px;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:600;font-size:.92rem}
+nav a.on{background:var(--green);border-color:var(--green);color:var(--on-green)}
+
+/* Seções do cardápio */
+section{padding:34px 0 6px}
+section h2{font-size:2rem;font-weight:800}
+.note{color:var(--muted);margin:8px 0 18px;font-size:.95rem}
+.item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.item .txt{flex:1;min-width:0}
+.item .row{display:flex;align-items:baseline;gap:8px}
+.item h3{margin:0;font:600 1.05rem/1.3 Figtree,sans-serif}
+.item .dots{flex:1;border-bottom:2px dotted var(--line);transform:translateY(-4px);min-width:12px}
+.item .price{font-weight:700;white-space:nowrap}
+.item p{margin:2px 0 0;color:var(--muted);font-size:.92rem}
+.add{flex:none;width:44px;height:44px;border-radius:50%;border:2px solid var(--green);background:transparent;color:var(--green);font:600 1.5rem/1 Figtree,sans-serif;cursor:pointer;display:grid;place-items:center}
+:root[data-theme="dark"] .add{color:var(--gold);border-color:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .add{color:var(--gold);border-color:var(--gold)}}
+.add:active{transform:scale(.92)}
+.add.pop{background:var(--gold);border-color:var(--gold);color:#1D1B18}
+.tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:6px;background:var(--gold);color:#1D1B18;font-size:.75rem;font-weight:600;vertical-align:middle}
+
+/* Barra e painel do pedido */
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));display:none}
+#bar.show{display:block}
+#bar button{width:100%;max-width:680px;margin:0 auto;display:flex;justify-content:space-between;padding:16px 20px;border:0;border-radius:14px;background:var(--gold);color:#1D1B18;font:700 1rem Figtree,sans-serif;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+#panel{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.5);display:none;align-items:flex-end}
+#panel.open{display:flex}
+.sheet{background:var(--surface);width:100%;max-width:720px;margin:0 auto;max-height:85%;overflow:auto;border-radius:20px 20px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom,0px))}
+.sheet h2{font-size:1.6rem;margin-bottom:8px}
+.line{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.line b{flex:1;font-weight:600}
+.qty button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:1.1rem;cursor:pointer}
+.qty span{display:inline-block;min-width:24px;text-align:center;font-weight:600}
+.total{display:flex;justify-content:space-between;font-weight:800;font-size:1.2rem;padding:14px 0}
+.sheet input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;margin-bottom:10px}
+.send{width:100%;padding:16px;border:0;border-radius:12px;background:var(--green);color:var(--on-green);font:700 1rem Figtree,sans-serif;cursor:pointer}
+.close{float:right;background:none;border:0;color:var(--muted);font:600 .95rem Figtree,sans-serif;cursor:pointer;padding:8px}
+footer{margin-top:40px;padding:28px 0 110px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.add:active{transform:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Panela e brasa na mesa.</h1>
+    <p>Feijoada, tropeiro, churrasco e comida de panela. Escolha os pratos e envie o pedido pelo WhatsApp.</p>
+    <div class="info">
+      <span>Seg a sáb, 11h às 22h</span>
+      <span>Dom, 11h às 17h</span>
+      <span>Retirada ou entrega</span>
+    </div>
+  </div>
+</header>
+
+<nav aria-label="Categorias"><div class="wrap" id="tabs"></div></nav>
+<main class="wrap" id="menu"></main>
+
+<footer><div class="wrap">Panela & Brasa · Rua Exemplo, 123 · Belo Horizonte, MG<br>Valores sujeitos a alteração. Avise no pedido se houver restrição alimentar.</div></footer>
+
+<div id="bar"><button id="openCart" type="button"><span id="barQty"></span><span id="barTotal"></span></button></div>
+<div id="panel" role="dialog" aria-modal="true" aria-label="Seu pedido">
+  <div class="sheet">
+    <button class="close" id="closeCart" type="button">Fechar</button>
+    <h2>Seu pedido</h2>
+    <div id="lines"></div>
+    <div class="total"><span>Total</span><span id="sum"></span></div>
+    <input id="who" placeholder="Seu nome" autocomplete="name">
+    <input id="obs" placeholder="Observações (ponto da carne, endereço, mesa)">
+    <button class="send" id="send" type="button">Enviar pedido pelo WhatsApp</button>
+  </div>
+</div>
+
+<script>
+/* ===== DADOS: edite pratos, descrições e preços aqui ===== */
+const WHATSAPP = "5531999999999"; // DDI + DDD + número, só dígitos
+const MENU = [
+ {id:"feijoada", nome:"Feijoada e tropeiro", obs:"Acompanham arroz, couve, farofa e laranja.", itens:[
+  ["Feijoada completa para 2","Feijão preto com carnes selecionadas, linguiça, costelinha e bacon.",89,"Mais pedido"],
+  ["Feijoada individual","Porção para uma pessoa, com todos os acompanhamentos.",49],
+  ["Feijão tropeiro","Feijão, farinha, bacon, linguiça, couve e ovo. Serve 2 pessoas.",36],
+  ["Tropeiro com torresmo","O tropeiro da casa com torresmo crocante por cima.",42]
+ ]},
+ {id:"grelhados", nome:"Grelhados e churrasco", obs:"Cortes de 400 g na brasa, com arroz, farofa e vinagrete.", itens:[
+  ["Picanha","Com capa de gordura, no ponto que você escolher.",98,"Da casa"],
+  ["Contrafilé","Macio e suculento, com tira de gordura.",72],
+  ["Ancho","Contrafilé sem osso, corte alto e marmoreado.",84],
+  ["Bife de chorizo","Corte argentino, sabor intenso na brasa.",84],
+  ["Filé mignon","O corte mais macio, grelhado na hora.",89],
+  ["Alcatra","Corte magro e tradicional.",64],
+  ["Maminha","Macia, com sabor marcante.",62],
+  ["Fraldinha","Fibras longas e muito suculenta.",66],
+  ["Prime rib","Corte nobre com osso, assado na brasa.",129]
+ ]},
+ {id:"assados", nome:"Assados e cozidos longos", obs:"Cozimento lento. Acompanham arroz, feijão e farofa.", itens:[
+  ["Costela ripa","Assada por horas, desmancha no garfo.",79,"Mais pedido"],
+  ["Costelão","Costela inteira, assada em baixa temperatura.",85],
+  ["Assado de tira","Tiras de costela assadas e douradas.",76],
+  ["Cupim","Fatiado, macio e com gordura na medida.",68],
+  ["Acém","Cozido lento no molho próprio.",52],
+  ["Paleta","Assada e desfiada na hora.",56],
+  ["Coxão mole","Fatiado ao molho de panela.",54],
+  ["Coxão duro","Cozido até ficar macio, com legumes.",50],
+  ["Lagarto","Recheado e cozido, servido fatiado.",58],
+  ["Ossobuco","Com tutano, cozido no caldo de legumes.",66]
+ ]},
+ {id:"dia", nome:"Dia a dia e executivos", obs:"Prato feito com arroz, feijão, salada e batata frita.", itens:[
+  ["Bife acebolado","Bife grelhado com cebola dourada.",34],
+  ["Carne de panela","Com batata e cenoura, cozida no caldo.",36],
+  ["Estrogonofe de carne","Molho cremoso com champignon.",38],
+  ["Medalhões","Medalhões de filé ao molho madeira.",48],
+  ["Carne moída","Refogada com temperos, feita com patinho.",30]
+ ]}
+];
+
+const R$ = v => v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const cart = {}; // chave -> {nome, preco, qtd}
+const $ = id => document.getElementById(id);
+
+/* Monta categorias e itens */
+$("tabs").innerHTML = MENU.map(c=>`<a href="#${c.id}" data-id="${c.id}">${c.nome}</a>`).join("");
+$("menu").innerHTML = MENU.map(c=>`
+ <section id="${c.id}"><h2>${c.nome}</h2><p class="note">${c.obs}</p>
+ ${c.itens.map((it,i)=>`
+  <div class="item"><div class="txt">
+   <div class="row"><h3>${it[0]}${it[3]?`<span class="tag">${it[3]}</span>`:""}</h3><span class="dots"></span><span class="price">${R$(it[2])}</span></div>
+   <p>${it[1]}</p></div>
+   <button class="add" type="button" data-k="${c.id}-${i}" aria-label="Adicionar ${it[0]} ao pedido">+</button></div>`).join("")}
+ </section>`).join("");
+
+const find = k => { const [c,i]=k.split("-"); const it=MENU.find(m=>m.id===c).itens[+i]; return {nome:it[0],preco:it[2]}; };
+
+/* Adicionar ao pedido */
+$("menu").addEventListener("click",e=>{
+  const b=e.target.closest(".add"); if(!b) return;
+  const k=b.dataset.k; cart[k]=cart[k]||{...find(k),qtd:0}; cart[k].qtd++;
+  b.classList.add("pop"); setTimeout(()=>b.classList.remove("pop"),250);
+  update();
+});
+
+function update(){
+  const ks=Object.keys(cart).filter(k=>cart[k].qtd>0);
+  const qtd=ks.reduce((s,k)=>s+cart[k].qtd,0), tot=ks.reduce((s,k)=>s+cart[k].qtd*cart[k].preco,0);
+  $("bar").classList.toggle("show",qtd>0);
+  $("barQty").textContent=`Ver pedido (${qtd} ${qtd===1?"item":"itens"})`;
+  $("barTotal").textContent=R$(tot); $("sum").textContent=R$(tot);
+  $("lines").innerHTML=ks.length?ks.map(k=>`<div class="line"><b>${cart[k].nome}</b>
+    <span class="qty"><button type="button" data-k="${k}" data-d="-1" aria-label="Diminuir">−</button><span>${cart[k].qtd}</span><button type="button" data-k="${k}" data-d="1" aria-label="Aumentar">+</button></span>
+    <span>${R$(cart[k].qtd*cart[k].preco)}</span></div>`).join(""):"<p class='note'>Seu pedido está vazio. Toque em + nos pratos para adicionar.</p>";
+  if(!qtd) $("panel").classList.remove("open");
+}
+$("lines").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-d]"); if(!b) return;
+  cart[b.dataset.k].qtd+=+b.dataset.d; update();
+});
+$("openCart").onclick=()=>$("panel").classList.add("open");
+$("closeCart").onclick=()=>$("panel").classList.remove("open");
+$("panel").addEventListener("click",e=>{ if(e.target.id==="panel") $("panel").classList.remove("open"); });
+
+/* Enviar pelo WhatsApp */
+$("send").onclick=()=>{
+  const ks=Object.keys(cart).filter(k=>cart[k].qtd>0); if(!ks.length) return;
+  let t=`Olá! Meu pedido${$("who").value?` (${$("who").value})`:""}:\n`;
+  ks.forEach(k=>t+=`• ${cart[k].qtd}x ${cart[k].nome} – ${R$(cart[k].qtd*cart[k].preco)}\n`);
+  t+=`\nTotal: ${$("sum").textContent}`;
+  if($("obs").value) t+=`\nObs.: ${$("obs").value}`;
+  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(t)}`,"_blank","noopener");
+};
+
+/* Destaca a categoria visível */
+const tabs=[...document.querySelectorAll("#tabs a")];
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){ tabs.forEach(a=>a.classList.toggle("on",a.dataset.id===e.target.id));
+    const on=tabs.find(a=>a.classList.contains("on")); if(on) on.scrollIntoView({inline:"center",block:"nearest"}); }
+}),{rootMargin:"-30% 0px -60% 0px"});
+document.querySelectorAll("section").forEach(s=>io.observe(s));
+update();
+</script>
+</body>
+</html>
